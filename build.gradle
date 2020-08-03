@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.3.2.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'org.openapi.generator' version '4.3.1'
+}
+
+group = 'org.openapitools'
+version = '1.0.0'
+
+sourceCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-webflux"
+    implementation "org.openapitools:jackson-databind-nullable:0.2.1"
+    implementation "io.swagger:swagger-annotations:1.5.22"
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "io.projectreactor:reactor-test"
+    testImplementation "com.squareup.okhttp3:okhttp:4.7.2"
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.7.2"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task openApiGenerateClient(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+	generatorName = "java"
+	inputSpec = "$rootDir/src/main/resources/openapi.yaml".toString()
+	outputDir = "$buildDir/open-api".toString()
+	configOptions = [
+		library: "webclient",
+		dateLibrary: "java8"
+	]
+}
+
+sourceSets.main.java.srcDir "$buildDir/open-api/src/main/java"
+
+compileJava.dependsOn tasks.openApiGenerateClient
